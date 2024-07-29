@@ -1,0 +1,43 @@
+{
+  "id_item": "MLA123456789",
+  "title": "iPhone 13 Pro Max 128GB",
+  "price": 350000,
+  "currency_id": "ARS",
+  "available_quantity": 5,
+  "sold_quantity": 10,
+  "condition": "new",
+  "description": {
+    "plain_text": "iPhone 13 Pro Max con 128GB de almacenamiento, color azul pacífico. Nuevo, en caja sellada."
+  },
+  "pictures": [
+    {
+      "id": "12345",
+      "url": "http://example.com/iphone13promax1.jpg"
+    },
+    {
+      "id": "12346",
+      "url": "http://example.com/iphone13promax2.jpg"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q123",
+      "date_created": "2024-07-21T15:30:00Z",
+      "text": "¿Viene con garantía internacional?",
+      "status": "UNANSWERED"
+    }
+  ],
+  "seller": {
+    "id": "s123",
+    "nickname": "best_seller123",
+    "registration_date": "2015-06-01T12:00:00Z",
+    "reputation": {
+      "level_id": "5_green",
+      "transactions": {
+        "total": 1500,
+        "canceled": 10,
+        "completed": 1490
+      }
+    }
+  }
+}
