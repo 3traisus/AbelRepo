@@ -5,7 +5,7 @@ from django.db import models
 
 # Create your models here.
 class Product(models.Model):
-    item_id = models.CharField(max_length=100, primary_key=True, editable=False)
+    id_item = models.CharField(max_length=100, primary_key=True, editable=False)
     title = models.CharField(max_length=250, null=False, blank=False)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     currency_id = models.CharField(max_length=10, null=False, blank=False)

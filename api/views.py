@@ -8,33 +8,32 @@ from .serializers import ProductSerializer, QuestionSerializer
 from .models import Product, Question
 from openai import OpenAI
 from django.conf import settings
-'''
+
 # Create your views here.
 #Metodo para extraer los datos del formato Json y poder agregarlos a la base de datos
 class ExtraProductAPIView(APIView):
     def get(self, request, *args, **kwargs):
 
-        document = kwargs['api/other.json']
-        with open(document, 'r', encoding='utf-8') as file:
+        with open('api/example2.json', 'r', encoding='utf-8') as file:
             date = json.load(file)
 
-            item_date = date.get('item', {})
-            question_date = date.get('question', [])
+            #item_date = date.get('item', {})
+            #question_date = date.get('question', [])
 
             #print(datos)
-            datos, created = Product.objects.get_or_create(
-                id_item=item_date['id_item'],
+            datos = Product.objects.get_or_create(
+                id_item=date['id_item'],
                 defaults={
-                    'title': item_date['title'],
-                    'price': item_date['price'],
-                    'currency_id': item_date['currency_id'],
-                    'available_quantity': item_date['available_quantity'],
-                    'sold_quantity': item_date['sold_quantity'],
-                    'condition': item_date['condition'],
-                    'attributes': item_date['attributes'],
+                    'title': date['title'],
+                    'price': date['price'],
+                    'currency_id': date['currency_id'],
+                    'available_quantity': date['available_quantity'],
+                    'sold_quantity': date['sold_quantity'],
+                    'condition': date['condition'],
+                    'attributes': date['attributes'],
                 }
             )
-
+            '''
             for question_dates in question_date:
                 question, created = Question.objects.get_or_create(
                     question_id=question_dates['question_id'],
@@ -46,25 +45,49 @@ class ExtraProductAPIView(APIView):
                         'date_created': question_dates['date_created'],
                     }
                 )
+            '''
+            client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-            serializer = ProductSerializer(datos)
-            serializers = QuestionSerializer(question, many=True)
+            product_attributes = f"Titulo: {date['title']}\nPrecio: {date['price']} {date['currency_id']}\nAtributos: {date['attributes']}"
+            for question in date['questions']:
+                prompt = f"\n\nLa pregunta es:{question.text}\nRespuesta:"
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED), Response(serializers.data, status=status.HTTP_200_OK)
+                response = client.chat.completions.create(
+                    model="",
+                    messages=[
+                        {"role": "system", "content": "Eres un asistente que responde mensajes relacionados a la venta de productos en linea"},
+                        {"role": "user", "content": product_attributes},
+                        {"role": "assistant", "content": "De acuerdo a las caracteristicas que me brindaste cual es tu pregunta? "},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=250,
+                    temperature=0.2,
+                )
+                answer = response.choices[0].message.content
+                # answer = response.choices[0].text.split()
+                datos[question]['answer'] = answer
+                datos[question]['status'] = 'ANSWERED'
+
+                serializer = ProductSerializer(datos)
+                #serializers = QuestionSerializer(question, many=True)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED), #Response(serializers.data, status=status.HTTP_200_OK)
 
 #Clase y metodo para listar los productos obtenidos del formato Json
 class ProductListView(APIView):
-
     def get(self, request, *args, **kwargs):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
-'''
+
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+    product_data = ''
+    with open('api/example2.json', 'r', encoding='utf-8') as file:
+        product_data = json.load(file)
     @action(detail=True, methods=['post'], url_path='question')
     def question(self, request, pk=None):
         prod = self.get_object()
@@ -88,6 +111,14 @@ class ProductViewSet(viewsets.ModelViewSet):
         prompt = f"\n\nLa pregunta es:{question.text}\nRespuesta:"
 
         client = OpenAI
+
+        assitent = client.beta.assistants.create(
+            name='Swipbot',
+            model="",
+            instructions='',
+            tools=[{"type": "code_interpreter"},{"type": "file_search"}],
+
+        )
         api_key = settings.OPENAI_API_KEY
         response = client.chat.completions.create(
             model="",
@@ -103,7 +134,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         answer = response.choices[0].message.content
         #answer = response.choices[0].text.split()
         question.answer = answer
-        question.status= 'ANSWERED'
+        question.status = 'ANSWERED'
         question.save()
 
         return Response({'answer': answer})

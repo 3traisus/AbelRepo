@@ -1,8 +1,6 @@
 {
-  "id_item": "MLB1494945960",
-  "id_question" : 447594313,
-  "question" : "Por que soy tan bueno?",
-  "title": "Smart WATCH",
+  "id_item": "MLB1494945961",
+  "title": "IPHONE 15 PRO",
   "price": 1499.99,
   "currency_id": "USD",
   "available_quantity": 150,
@@ -58,5 +56,13 @@
       "attribute_group_name": "Otros"
     }
   ],
-  "warranty": "12 meses"
+  "warranty": "12 meses",
+  "questions": [
+    {
+      "id": "q123",
+      "date_created": "2024-07-21T15:30:00Z",
+      "text": "¿Viene con garantía internacional?",
+      "status": "UNANSWERED"
+    }
+  ]
 }
